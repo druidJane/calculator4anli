@@ -42,7 +42,7 @@ public class Calculator {
      *  计算,相当于计算器的等于按钮
      *  如果执行过undo，redo操作，则移除resultList在lastResultIndex之后的数据
      */
-    public void calculate(){
+    public void calculate() {
         String start = display();
         preResult = preResult == null ? BigDecimal.ZERO : preResult;
         if(operator == null){
@@ -50,7 +50,13 @@ public class Calculator {
         }
         if(input != null){ // 新输入值
             // 累加计算
-            BigDecimal ret = doCalculate(preResult, operator, input);
+            BigDecimal ret = null;
+            try {
+                ret = doCalculate(preResult, operator, input);
+            } catch (Exception e) {
+                log.warn("doCalculate failed {}", e.getMessage());
+                return;
+            }
             if(resultList.size()-1 > lastResultIndex){
                 //移除resultList在lastResultIndex之后的数据
                 resultList = resultList.subList(0, lastResultIndex + 1);
@@ -110,27 +116,30 @@ public class Calculator {
      * 进行累计计算
      * @param preTotal 前面已累计值
      * @param curOperator 当前操作
-     * @param newNum 新输入值
+     * @param input 新输入值
      * @return 计算结果
      */
-    private BigDecimal doCalculate(BigDecimal preTotal, String curOperator, BigDecimal newNum) {
-        BigDecimal ret = BigDecimal.ZERO;
+    private BigDecimal doCalculate(BigDecimal preTotal, String curOperator, BigDecimal input) throws Exception {
+        BigDecimal result = BigDecimal.ZERO;
         curOperator = curOperator == null ? "+" : curOperator;
         switch (curOperator){
             case "+":
-                ret = preTotal.add(newNum);
+                result = preTotal.add(input);
                 break;
             case "-":
-                ret = preTotal.subtract(newNum).setScale(SCALE, RoundingMode.HALF_UP);
+                result = preTotal.subtract(input).setScale(SCALE, RoundingMode.HALF_UP);
                 break;
             case "*":
-                ret = preTotal.multiply(newNum).setScale(SCALE, RoundingMode.HALF_UP);
+                result = preTotal.multiply(input).setScale(SCALE, RoundingMode.HALF_UP);
                 break;
             case "/":
-                ret = preTotal.divide(newNum, RoundingMode.HALF_UP);
+                if(input.equals(BigDecimal.ZERO)){
+                    throw new Exception("/ by zero");
+                }
+                result = preTotal.divide(input, RoundingMode.HALF_UP);
                 break;
         }
-        return ret;
+        return result;
     }
 
     /**
@@ -158,6 +167,11 @@ public class Calculator {
         calculator.calculate();
         calculator.setOperator("*");
         calculator.setInput(new BigDecimal(25));
+        calculator.calculate();
+        calculator.setOperator("/");
+        calculator.setInput(new BigDecimal(0));
+        calculator.calculate();
+        calculator.setInput(new BigDecimal(10));
         calculator.calculate();
         calculator.undo();
 
