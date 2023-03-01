@@ -152,17 +152,17 @@ public class Calculator {
 
     public static void main(String[] args) {
         Calculator calculator = new Calculator();
-        calculator.setInput(new BigDecimal(3));
+        calculator.setInput(new BigDecimal(13));
         calculator.setOperator("+");
-        calculator.setInput(new BigDecimal(5));
+        calculator.setInput(new BigDecimal(51));
         calculator.calculate();
         calculator.setOperator("*");
-        calculator.setInput(new BigDecimal(2));
+        calculator.setInput(new BigDecimal(25));
         calculator.calculate();
         calculator.undo();
 
         calculator.setOperator("+");
-        calculator.setInput(new BigDecimal(2));
+        calculator.setInput(new BigDecimal(200));
         calculator.calculate();
 
         calculator.undo();
